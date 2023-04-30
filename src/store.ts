@@ -26,15 +26,27 @@ workspaceIdsAtom.onMount = (set) => {
 
 export const currentWorkspaceIdAtom = atom<string | null>(null)
 
-class WorkspaceMap extends Map<string, Workspace> {
-  public providers: Map<string, ReturnType<typeof createIndexedDBProvider>> = new Map()
+const hashMap = new Map<string, Workspace>()
 
-  override set (key: string, workspace: Workspace) {
-    if (this.has(key)) return this
-    const provider = createIndexedDBProvider(key, workspace.doc)
-    this.providers.set(key, provider)
+export const currentWorkspaceAtom = atom<Promise<Workspace | null>>(
+  async (get, {
+    signal
+  }) => {
+    const id = get(currentWorkspaceIdAtom)
+    if (!id) return null
+    let workspace = hashMap.get(id)
+    if (!workspace) {
+      workspace = new Workspace({
+        id
+      })
+      workspace.register(AffineSchemas)
+      hashMap.set(id, workspace)
+    }
+    const provider = createIndexedDBProvider(workspace.id, workspace.doc)
+    assertExists(provider)
     provider.connect()
     provider.whenSynced.then(() => {
+      assertExists(workspace)
       if (workspace.isEmpty) {
         const page = workspace.createPage({
           id: 'page0'
@@ -56,44 +68,12 @@ class WorkspaceMap extends Map<string, Workspace> {
         assertExists(page)
       }
     })
-    return super.set(key, workspace)
-  }
-
-  override get (key: string) {
-    return super.get(key)
-  }
-}
-
-const hashMap = new WorkspaceMap()
-
-export const currentWorkspaceAtom = atom<Promise<Workspace | null>>(
-  async (get) => {
-    const id = get(currentWorkspaceIdAtom)
-    if (!id) return null
-    let workspace = hashMap.get(id)
-    if (!workspace) {
-      workspace = new Workspace({
-        id
-      })
-      workspace.register(AffineSchemas)
-      hashMap.set(id, workspace)
-    }
-    const provider = hashMap.providers.get(workspace.id)
-    assertExists(provider)
+    signal.addEventListener('abort', () => {
+      provider.disconnect()
+    })
     await provider.whenSynced
     return workspace
   })
-
-let prevWorkspace: Workspace | null = null
-rootStore.sub(currentWorkspaceAtom, async () => {
-  if (prevWorkspace) {
-    // cleanup providers
-    const provider = await hashMap.providers.get(prevWorkspace.id)
-    assertExists(provider)
-    provider.disconnect()
-  }
-  prevWorkspace = await rootStore.get(currentWorkspaceAtom)
-})
 
 export const editorAtom = atom<Promise<EditorContainer | null>>(async (get) => {
   const workspace = await get(currentWorkspaceAtom)
