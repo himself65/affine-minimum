@@ -2,3 +2,8 @@ html, body {
   margin: 0;
   padding: 0;
 }
+
+#editor-container {
+  width: 100vw;
+  height: 100vh;
+}
