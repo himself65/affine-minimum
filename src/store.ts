@@ -6,7 +6,7 @@ import { createIndexedDBProvider } from '@toeverything/y-indexeddb'
 import { AffineSchemas } from '@blocksuite/blocks/models'
 import type { EditorContainer } from '@blocksuite/editor'
 import { useSyncExternalStore } from 'react'
-import { PageMeta } from '@blocksuite/store/src/workspace/meta.ts'
+import type { PageMeta } from '@blocksuite/store'
 import { initPage, WorkspaceNotFoundError } from './utils.ts'
 
 const editorContainerAtom = atom<Promise<typeof EditorContainer>>(async () => {
