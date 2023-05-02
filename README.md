@@ -8,6 +8,7 @@
 - [x] `useSyncExternalStore` example
 - [x] React 18 `suspense` example
 - [x] BlockSuite Editor embed example
+- [x] Rxjs example
 - [x] Next.js
 - [ ] React Server Component
 - [ ] Design of workspace loading
