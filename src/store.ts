@@ -1,7 +1,6 @@
 import { createStore, atom } from 'jotai'
 import { atomWithStorage } from 'jotai/utils'
 import { assertExists, Workspace } from '@blocksuite/store'
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-expect-error
 import { createIndexedDBProvider } from '@toeverything/y-indexeddb'
 import { AffineSchemas } from '@blocksuite/blocks/models'
