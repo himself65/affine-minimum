@@ -18,7 +18,11 @@ const editorContainerAtom = atom<Promise<typeof EditorContainer>>(async () => {
 
 export const rootStore = createStore()
 
-export const workspaceIdsAtom = atomWithStorage<string[]>('workspaces', [])
+// if the value is `null`, it means the user has not created any workspace yet
+export const workspaceIdsAtom = atomWithStorage<string[] | null>('workspaces', null)
+
+// hotfix for jotai #1813
+rootStore.sub(workspaceIdsAtom, () => {})
 
 workspaceIdsAtom.onMount = (set) => {
   if (localStorage.getItem('workspaces') === null) {
@@ -39,7 +43,11 @@ export const currentWorkspaceAtom = atom<Promise<Workspace | null>>(
   }) => {
     const ids = get(workspaceIdsAtom)
     const id = get(currentWorkspaceIdAtom)
+    console.log(ids)
     if (!id) return null
+    if (ids === null) {
+      return null
+    }
     if (ids.indexOf(id) === -1) {
       throw new WorkspaceNotFoundError('workspace not found')
     }

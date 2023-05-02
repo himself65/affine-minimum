@@ -1,4 +1,4 @@
-import { useAtomValue, useSetAtom } from 'jotai'
+import { useAtom, useSetAtom } from 'jotai'
 import {
   currentPageIdAtom,
   currentWorkspaceIdAtom,
@@ -9,19 +9,18 @@ import React, { useCallback } from 'react'
 import { cardStyle, containerStyle } from './index.css.ts'
 
 export const WorkspaceList = () => {
-  const ids = useAtomValue(workspaceIdsAtom)
+  const [ids, setIds] = useAtom(workspaceIdsAtom)
   const router = useRouter()
-  const setIds = useSetAtom(workspaceIdsAtom)
   const setWorkspaceId = useSetAtom(currentWorkspaceIdAtom)
   const setPageId = useSetAtom(currentPageIdAtom)
   return (
     <div className={containerStyle}>
-      {ids.map((id) => (
+      {ids && ids.map((id) => (
         <div className={cardStyle} key={id}>
           <button
             onClick={(e) => {
               e.preventDefault()
-              setIds((ids) => ids.filter((i) => i !== id))
+              setIds((ids) => ids!.filter((i) => i !== id))
             }}
           >
             delete
@@ -43,6 +42,9 @@ export const WorkspaceList = () => {
           const id = prompt('Workspace ID')
           if (id) {
             setIds((ids) => {
+              if (!ids) {
+                return [id]
+              }
               if (ids.includes(id)) {
                 return ids
               }
