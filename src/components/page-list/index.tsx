@@ -1,9 +1,12 @@
-import { useSetAtom } from 'jotai'
-import { currentPageIdAtom, useCurrentPageList } from '../../store.ts'
+import { useAtomValue, useSetAtom } from 'jotai'
+import {
+  currentPageIdAtom,
+  currentPageMetaAtom,
+} from '../../store.ts'
 import { ReactElement } from 'react'
 
 export const PageList = (): ReactElement => {
-  const pageList= useCurrentPageList()
+  const pageList= useAtomValue(currentPageMetaAtom)
   const setPageId= useSetAtom(currentPageIdAtom)
   return (
     <div>

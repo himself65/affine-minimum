@@ -34,6 +34,9 @@ dependencies:
   react-error-boundary:
     specifier: ^4.0.4
     version: 4.0.4(react@18.2.0)
+  rxjs:
+    specifier: ^7.8.1
+    version: 7.8.1
   yjs:
     specifier: ^13.6.0
     version: 13.6.0
@@ -3721,6 +3724,12 @@ packages:
     dependencies:
       queue-microtask: 1.2.3
     dev: true
+
+  /rxjs@7.8.1:
+    resolution: {integrity: sha512-AA3TVj+0A2iuIoQkWEK/tqFjBq2j+6PO6Y0zJcvzLAFhEFIO3HL0vls9hWLncZbAAbK0mar7oZ4V079I/qPMxg==}
+    dependencies:
+      tslib: 2.5.0
+    dev: false
 
   /safari-14-idb-fix@3.0.0:
     resolution: {integrity: sha512-eBNFLob4PMq8JA1dGyFn6G97q3/WzNtFK4RnzT1fnLq+9RyrGknzYiM/9B12MnKAxuj1IXr7UKYtTNtjyKMBog==}
