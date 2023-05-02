@@ -102,6 +102,7 @@ const observable = new Observable<PageMeta[]>(subscriber => {
 
   return () => {
     dispose()
+    group?.dispose()
   }
 })
 
