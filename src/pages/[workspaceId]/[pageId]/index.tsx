@@ -8,7 +8,7 @@ import { Suspense, useEffect, useState } from 'react'
 
 import Link from 'next/link'
 import { Editor } from '../../../components/Editor'
-import { buttonStyle, containerStyle } from './index.css.ts'
+import { buttonStyle, containerStyle } from '../../../styles/index.css.ts'
 import { PageList } from '../../../components/page-list'
 import { assertExists } from '@blocksuite/store'
 import { initPage } from '../../../utils.ts'
