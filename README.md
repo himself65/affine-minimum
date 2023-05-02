@@ -11,3 +11,8 @@
 - [x] Next.js
 - [ ] React Server Component
 - [ ] Design of workspace loading
+
+## After class assignment
+
+1. How to support multiple editors in one screen easily?
+2. How to support multiple workspaces in one screen easily?
