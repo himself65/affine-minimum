@@ -80,14 +80,9 @@ export const currentWorkspaceAtom = atom<Promise<Workspace | null>>(
 export const currentPageMetaAtom = atomWithObservable<PageMeta[]>(
   (get) => {
     return new Observable<PageMeta[]>(subscriber => {
-      let group: DisposableGroup | null = null
+      const group = new DisposableGroup()
       get(currentWorkspaceAtom).then(workspace => {
         if (workspace) {
-          if (group) {
-            group.dispose()
-            group = null
-          }
-          group = new DisposableGroup()
           group.add(workspace.slots.pageAdded.on(() => {
             subscriber.next(workspace.meta.pageMetas)
           }))
@@ -99,7 +94,7 @@ export const currentPageMetaAtom = atomWithObservable<PageMeta[]>(
       })
 
       return () => {
-        group?.dispose()
+        group.dispose()
       }
     })
   })
