@@ -4,7 +4,7 @@ import { describe, expect, test } from 'vitest'
 import {
   currentWorkspaceAtom,
   currentWorkspaceIdAtom,
-  rootStore
+  rootStore, workspaceIdsAtom
 } from '../store'
 import { assertExists } from '@blocksuite/store'
 
@@ -13,6 +13,7 @@ describe('store', () => {
     expect(rootStore.get(currentWorkspaceIdAtom)).toBe(null)
     expect(await rootStore.get(currentWorkspaceAtom)).toBe(null)
 
+    rootStore.set(workspaceIdsAtom, ['workspace0'])
     rootStore.set(currentWorkspaceIdAtom, 'workspace0')
     const workspace = await rootStore.get(currentWorkspaceAtom)
     assertExists(workspace)
@@ -21,6 +22,7 @@ describe('store', () => {
   })
 
   test('switch workspace', async () => {
+    rootStore.set(workspaceIdsAtom, ['workspace1', 'workspace2'])
     rootStore.set(currentWorkspaceIdAtom, 'workspace1')
     {
       const workspace = await rootStore.get(currentWorkspaceAtom)
