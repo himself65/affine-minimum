@@ -1,13 +1,14 @@
 import { createStore, atom } from 'jotai'
 import { atomWithStorage } from 'jotai/utils'
-import { assertExists, Workspace } from '@blocksuite/store'
+import { assertExists, DisposableGroup, Workspace } from '@blocksuite/store'
+import { atomWithObservable } from 'jotai/utils'
 // @ts-expect-error
 import { createIndexedDBProvider } from '@toeverything/y-indexeddb'
 import { AffineSchemas } from '@blocksuite/blocks/models'
 import type { EditorContainer } from '@blocksuite/editor'
-import { useSyncExternalStore } from 'react'
 import type { PageMeta } from '@blocksuite/store'
 import { initPage, WorkspaceNotFoundError } from './utils.ts'
+import { Observable } from 'rxjs'
 
 const editorContainerAtom = atom<Promise<typeof EditorContainer>>(async () => {
   const { EditorContainer } = await import('@blocksuite/editor')
@@ -30,25 +31,6 @@ export const currentWorkspaceIdAtom = atom<string | null>(null)
 export const currentPageIdAtom = atom<string | null>(null)
 
 const hashMap = new Map<string, Workspace>()
-
-const ref = {
-  value: [] as PageMeta[],
-  callback: new Set<() => void>(),
-  subscribe: (onStoreChange: () => void) => {
-    ref.callback.add(onStoreChange)
-    return () => {
-      ref.callback.delete(onStoreChange)
-    }
-  },
-  getSnapshot: () => ref.value
-}
-
-export const useCurrentPageList = () => {
-  return useSyncExternalStore(
-    ref.subscribe,
-    ref.getSnapshot
-  )
-}
 
 export const currentWorkspaceAtom = atom<Promise<Workspace | null>>(
   async (get, {
@@ -84,20 +66,47 @@ export const currentWorkspaceAtom = atom<Promise<Workspace | null>>(
         assertExists(page)
       }
     })
-    ref.value = workspace.meta.pageMetas
-    ref.callback.forEach(cb => cb())
-    const dispose = workspace.slots.pageAdded.on(() => {
-      assertExists(workspace)
-      ref.value = workspace.meta.pageMetas
-      ref.callback.forEach(cb => cb())
-    })
+    await provider.whenSynced
+    if (signal.aborted) {
+      provider.disconnect()
+      return null
+    }
     signal.addEventListener('abort', () => {
       provider.disconnect()
-      dispose.dispose()
     })
-    await provider.whenSynced
     return workspace
   })
+
+const observable = new Observable<PageMeta[]>(subscriber => {
+  let group: DisposableGroup | null = null
+  const get = () => {
+    rootStore.get(currentWorkspaceAtom).then(workspace => {
+      if (workspace) {
+        if (group) {
+          group.dispose()
+          group = null
+        }
+        group = new DisposableGroup()
+        group.add(workspace.slots.pageAdded.on(() => {
+          subscriber.next(workspace.meta.pageMetas)
+        }))
+        group.add(workspace.slots.pageRemoved.on(() => {
+          subscriber.next(workspace.meta.pageMetas)
+        }))
+        subscriber.next(workspace.meta.pageMetas)
+      }
+    })
+  }
+  const dispose = rootStore.sub(currentWorkspaceAtom, () => get())
+  get()
+
+  return () => {
+    dispose()
+  }
+})
+
+export const currentPageMetaAtom = atomWithObservable<PageMeta[]>(
+  () => observable)
 
 export const editorAtom = atom<Promise<EditorContainer | null>>(async (get) => {
   const workspace = await get(currentWorkspaceAtom)
