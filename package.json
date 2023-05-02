@@ -22,6 +22,7 @@
     "next": "^13.3.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-error-boundary": "^4.0.4",
     "yjs": "^13.6.0"
   },
   "devDependencies": {
@@ -29,6 +30,8 @@
     "@types/react-dom": "^18.0.11",
     "@typescript-eslint/eslint-plugin": "^5.57.1",
     "@typescript-eslint/parser": "^5.57.1",
+    "@vanilla-extract/css": "^1.11.0",
+    "@vanilla-extract/next-plugin": "^2.1.2",
     "eslint": "^8.38.0",
     "eslint-config-next": "^13.3.4",
     "fake-indexeddb": "^4.0.1",

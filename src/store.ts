@@ -5,6 +5,9 @@ import { assertExists, Workspace } from '@blocksuite/store'
 import { createIndexedDBProvider } from '@toeverything/y-indexeddb'
 import { AffineSchemas } from '@blocksuite/blocks/models'
 import type { EditorContainer } from '@blocksuite/editor'
+import { useSyncExternalStore } from 'react'
+import { PageMeta } from '@blocksuite/store/src/workspace/meta.ts'
+import { initPage, WorkspaceNotFoundError } from './utils.ts'
 
 const editorContainerAtom = atom<Promise<typeof EditorContainer>>(async () => {
   const { EditorContainer } = await import('@blocksuite/editor')
@@ -24,15 +27,39 @@ workspaceIdsAtom.onMount = (set) => {
 }
 
 export const currentWorkspaceIdAtom = atom<string | null>(null)
+export const currentPageIdAtom = atom<string | null>(null)
 
 const hashMap = new Map<string, Workspace>()
+
+const ref = {
+  value: [] as PageMeta[],
+  callback: new Set<() => void>(),
+  subscribe: (onStoreChange: () => void) => {
+    ref.callback.add(onStoreChange)
+    return () => {
+      ref.callback.delete(onStoreChange)
+    }
+  },
+  getSnapshot: () => ref.value
+}
+
+export const useCurrentPageList = () => {
+  return useSyncExternalStore(
+    ref.subscribe,
+    ref.getSnapshot
+  )
+}
 
 export const currentWorkspaceAtom = atom<Promise<Workspace | null>>(
   async (get, {
     signal
   }) => {
+    const ids = get(workspaceIdsAtom)
     const id = get(currentWorkspaceIdAtom)
     if (!id) return null
+    if (ids.indexOf(id) === -1) {
+      throw new WorkspaceNotFoundError('workspace not found')
+    }
     let workspace = hashMap.get(id)
     if (!workspace) {
       workspace = new Workspace({
@@ -51,24 +78,22 @@ export const currentWorkspaceAtom = atom<Promise<Workspace | null>>(
           id: 'page0'
         })
 
-        const pageBlockId = page.addBlock('affine:page', {
-          title: new Text()
-        })
-
-        page.addBlock('affine:surface', {}, null)
-
-        // Add frame block inside page block
-        const frameId = page.addBlock('affine:frame', {}, pageBlockId)
-        // Add paragraph block inside frame block
-        page.addBlock('affine:paragraph', {}, frameId)
-        page.resetHistory()
+        initPage(page)
       } else {
         const page = workspace.getPage('page0')
         assertExists(page)
       }
     })
+    ref.value = workspace.meta.pageMetas
+    ref.callback.forEach(cb => cb())
+    const dispose = workspace.slots.pageAdded.on(() => {
+      assertExists(workspace)
+      ref.value = workspace.meta.pageMetas
+      ref.callback.forEach(cb => cb())
+    })
     signal.addEventListener('abort', () => {
       provider.disconnect()
+      dispose.dispose()
     })
     await provider.whenSynced
     return workspace
@@ -76,25 +101,25 @@ export const currentWorkspaceAtom = atom<Promise<Workspace | null>>(
 
 export const editorAtom = atom<Promise<EditorContainer | null>>(async (get) => {
   const workspace = await get(currentWorkspaceAtom)
-  if (!workspace) return null
+  const pageId = get(currentPageIdAtom)
+  if (!workspace || !pageId) return null
   const EditorContainer = await get(editorContainerAtom)
   const editor = new EditorContainer()
-  const page = workspace.getPage('page0')
-  assertExists(page)
+  const page = workspace.getPage(pageId)
+  if (!page) {
+    return null
+  }
   editor.page = page
   return editor
 })
 
 if (typeof window !== 'undefined') {
-  const id = window.location.pathname.split('/')[1]
-  if (id) {
-    rootStore.set(currentWorkspaceIdAtom, id)
-    const items = localStorage.getItem('workspaces')
-    if (!items || JSON.parse(items).indexOf(id) === -1) {
-      localStorage.setItem('workspaces', JSON.stringify([
-        ...JSON.parse(items || '[]'),
-        id
-      ]))
-    }
+  const workspaceId = window.location.pathname.split('/')[1]
+  const pageId = window.location.pathname.split('/')[2]
+  if (workspaceId) {
+    rootStore.set(currentWorkspaceIdAtom, workspaceId)
+  }
+  if (pageId) {
+    rootStore.set(currentPageIdAtom, pageId)
   }
 }
