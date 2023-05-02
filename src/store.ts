@@ -77,37 +77,32 @@ export const currentWorkspaceAtom = atom<Promise<Workspace | null>>(
     return workspace
   })
 
-const observable = new Observable<PageMeta[]>(subscriber => {
-  let group: DisposableGroup | null = null
-  const get = () => {
-    rootStore.get(currentWorkspaceAtom).then(workspace => {
-      if (workspace) {
-        if (group) {
-          group.dispose()
-          group = null
+export const currentPageMetaAtom = atomWithObservable<PageMeta[]>(
+  (get) => {
+    return new Observable<PageMeta[]>(subscriber => {
+      let group: DisposableGroup | null = null
+      get(currentWorkspaceAtom).then(workspace => {
+        if (workspace) {
+          if (group) {
+            group.dispose()
+            group = null
+          }
+          group = new DisposableGroup()
+          group.add(workspace.slots.pageAdded.on(() => {
+            subscriber.next(workspace.meta.pageMetas)
+          }))
+          group.add(workspace.slots.pageRemoved.on(() => {
+            subscriber.next(workspace.meta.pageMetas)
+          }))
+          subscriber.next(workspace.meta.pageMetas)
         }
-        group = new DisposableGroup()
-        group.add(workspace.slots.pageAdded.on(() => {
-          subscriber.next(workspace.meta.pageMetas)
-        }))
-        group.add(workspace.slots.pageRemoved.on(() => {
-          subscriber.next(workspace.meta.pageMetas)
-        }))
-        subscriber.next(workspace.meta.pageMetas)
+      })
+
+      return () => {
+        group?.dispose()
       }
     })
-  }
-  const dispose = rootStore.sub(currentWorkspaceAtom, () => get())
-  get()
-
-  return () => {
-    dispose()
-    group?.dispose()
-  }
-})
-
-export const currentPageMetaAtom = atomWithObservable<PageMeta[]>(
-  () => observable)
+  })
 
 export const editorAtom = atom<Promise<EditorContainer | null>>(async (get) => {
   const workspace = await get(currentWorkspaceAtom)
