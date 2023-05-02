@@ -8,7 +8,8 @@ import { AffineSchemas } from '@blocksuite/blocks/models'
 import type { EditorContainer } from '@blocksuite/editor'
 import type { PageMeta } from '@blocksuite/store'
 import { initPage, WorkspaceNotFoundError } from './utils.ts'
-import { Observable } from 'rxjs'
+import { Observable, from } from 'rxjs'
+import { filter, mergeMap } from 'rxjs/operators'
 
 const editorContainerAtom = atom<Promise<typeof EditorContainer>>(async () => {
   const { EditorContainer } = await import('@blocksuite/editor')
@@ -79,24 +80,26 @@ export const currentWorkspaceAtom = atom<Promise<Workspace | null>>(
 
 export const currentPageMetaAtom = atomWithObservable<PageMeta[]>(
   (get) => {
-    return new Observable<PageMeta[]>(subscriber => {
-      const group = new DisposableGroup()
-      get(currentWorkspaceAtom).then(workspace => {
-        if (workspace) {
+    return from(get(currentWorkspaceAtom)).pipe(
+      filter((workspace): workspace is Workspace => workspace !== null),
+      mergeMap(workspace => {
+        const group = new DisposableGroup()
+        return new Observable<PageMeta[]>((subscriber) => {
           group.add(workspace.slots.pageAdded.on(() => {
+
             subscriber.next(workspace.meta.pageMetas)
           }))
           group.add(workspace.slots.pageRemoved.on(() => {
             subscriber.next(workspace.meta.pageMetas)
           }))
           subscriber.next(workspace.meta.pageMetas)
-        }
-      })
 
-      return () => {
-        group.dispose()
-      }
-    })
+          return () => {
+            group.dispose()
+          }
+        })
+      })
+    )
   })
 
 export const editorAtom = atom<Promise<EditorContainer | null>>(async (get) => {
