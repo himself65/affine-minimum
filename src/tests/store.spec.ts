@@ -2,14 +2,20 @@ import 'fake-indexeddb/auto'
 
 import { describe, expect, test } from 'vitest'
 import {
-  currentWorkspaceAtom,
-  currentWorkspaceIdAtom,
-  rootStore, workspaceIdsAtom
+  WorkspaceMolecule,
+  rootStore,
 } from '../store'
+import { useMolecule } from 'jotai-molecules'
 import { assertExists } from '@blocksuite/store'
+import { renderHook } from '@testing-library/react'
+
+function getAtoms() {
+  return renderHook(() => useMolecule(WorkspaceMolecule)).result.current
+}
 
 describe('store', () => {
   test('init', async () => {
+    const { currentWorkspaceIdAtom, currentWorkspaceAtom, workspaceIdsAtom } = getAtoms()
     expect(rootStore.get(currentWorkspaceIdAtom)).toBe(null)
     expect(await rootStore.get(currentWorkspaceAtom)).toBe(null)
 
@@ -22,6 +28,7 @@ describe('store', () => {
   })
 
   test('switch workspace', async () => {
+    const { currentWorkspaceIdAtom, currentWorkspaceAtom, workspaceIdsAtom } = getAtoms()
     rootStore.set(workspaceIdsAtom, ['workspace1', 'workspace2'])
     rootStore.set(currentWorkspaceIdAtom, 'workspace1')
     {
