@@ -9,6 +9,7 @@
 ## Features
 
 - [x] jotai atoms example
+- [x] jotai-molecule example
 - [x] `useSyncExternalStore` example
 - [x] React 18 `suspense` example
 - [x] BlockSuite Editor embed example
