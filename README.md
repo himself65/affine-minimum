@@ -1,10 +1,8 @@
 # AFFiNE Minimum
 
-> This is a minimum implementation of the AFFiNE project.
-> 
-> It is used for the beginner who wants to learn the AFFiNE infrastructure, or React.js Ecosystem.
-> 
-> It is also used for the developer who wants to contribute to the AFFiNE.
+This is a minimum implementation of the AFFiNE project.
+
+> If you are looking for the latest code, please see [dev branch](https://github.com/Himself65/affine-minimum/tree/dev)
 
 ## Features
 
