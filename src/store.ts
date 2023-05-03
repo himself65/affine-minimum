@@ -9,7 +9,7 @@ import type { EditorContainer } from '@blocksuite/editor'
 import type { PageMeta } from '@blocksuite/store'
 import { initPage, WorkspaceNotFoundError } from './utils.ts'
 import { Observable, from } from 'rxjs'
-import { filter, mergeMap } from 'rxjs/operators'
+import { filter, switchMap } from 'rxjs/operators'
 
 const editorContainerAtom = atom<Promise<typeof EditorContainer>>(async () => {
   const { EditorContainer } = await import('@blocksuite/editor')
@@ -90,7 +90,7 @@ export const currentPageMetaAtom = atomWithObservable<PageMeta[]>(
   (get) => {
     return from(get(currentWorkspaceAtom)).pipe(
       filter((workspace): workspace is Workspace => workspace !== null),
-      mergeMap(workspace => {
+      switchMap(workspace => {
         const group = new DisposableGroup()
         return new Observable<PageMeta[]>((subscriber) => {
           group.add(workspace.slots.pageAdded.on(() => {
