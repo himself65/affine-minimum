@@ -16,6 +16,9 @@ dependencies:
   jotai:
     specifier: ^2.0.4
     version: 2.0.4(react@18.2.0)
+  jotai-molecules:
+    specifier: ^1.1.1
+    version: 1.1.1(jotai@2.0.4)(react@18.2.0)
   lit:
     specifier: ^2.7.3
     version: 2.7.3
@@ -3041,6 +3044,17 @@ packages:
       merge-stream: 2.0.0
       supports-color: 8.1.1
     dev: true
+
+  /jotai-molecules@1.1.1(jotai@2.0.4)(react@18.2.0):
+    resolution: {integrity: sha512-Z57pYXbZumT/Ix/nAFZdSF6ur4V2bTRO6Trh/iNwUwzUnw446UsxdObJ9+eWrhd/WUjAqq9TyIei/txKRNtSvw==}
+    engines: {node: '>=10'}
+    peerDependencies:
+      jotai: '>=1'
+      react: '>=16'
+    dependencies:
+      jotai: 2.0.4(react@18.2.0)
+      react: 18.2.0
+    dev: false
 
   /jotai@2.0.4(react@18.2.0):
     resolution: {integrity: sha512-XkR1Jtm4a2iKV/7fdB3rNHjJz8FkkDMVczqiAok7lt8W4F69l/ZQkPGWSEV+hJOJXRn27k6XYKOoKEQIwBuAMA==}

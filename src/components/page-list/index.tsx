@@ -1,12 +1,11 @@
 import { useAtomValue, useSetAtom } from 'jotai'
-import {
-  currentPageIdAtom,
-  currentPageMetaAtom,
-} from '../../store.ts'
+import { WorkspaceMolecule } from '../../store.ts'
 import { ReactElement } from 'react'
+import { useMolecule } from 'jotai-molecules'
 
 export const PageList = (): ReactElement => {
-  const pageList= useAtomValue(currentPageMetaAtom)
+  const { currentPageIdAtom,currentPageMetaAtom } = useMolecule(WorkspaceMolecule)
+  const pageList = useAtomValue(currentPageMetaAtom)
   const setPageId= useSetAtom(currentPageIdAtom)
   return (
     <div>
