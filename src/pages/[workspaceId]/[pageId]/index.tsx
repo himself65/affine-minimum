@@ -25,7 +25,7 @@ const WorkspacePage = () => {
   const scopeValue = useMemo(() => ({
     defaultPage: pageId,
     defaultWorkspace: workspaceId,
-    defaultMode: 'edgeless'
+    defaultMode: 'page'
   }) as const, [pageId, workspaceId])
   if (isInitialRender) {
     return 'Loading...'
