@@ -1,14 +1,18 @@
 import { useAtom, useSetAtom } from 'jotai'
 import {
-  currentPageIdAtom,
-  currentWorkspaceIdAtom,
-  workspaceIdsAtom
+  WorkspaceMolecule
 } from '../../store.ts'
 import { useRouter } from 'next/router'
 import React, { useCallback } from 'react'
 import { cardStyle, containerStyle } from './index.css.ts'
+import { useMolecule } from 'jotai-molecules'
 
 export const WorkspaceList = () => {
+  const {
+    currentPageIdAtom,
+    currentWorkspaceIdAtom,
+    workspaceIdsAtom
+  } = useMolecule(WorkspaceMolecule)
   const [ids, setIds] = useAtom(workspaceIdsAtom)
   const router = useRouter()
   const setWorkspaceId = useSetAtom(currentWorkspaceIdAtom)
@@ -38,20 +42,20 @@ export const WorkspaceList = () => {
         </div>
       ))}
       <div className={cardStyle}
-        onClick={useCallback(() => {
-          const id = prompt('Workspace ID')
-          if (id) {
-            setIds((ids) => {
-              if (!ids) {
-                return [id]
-              }
-              if (ids.includes(id)) {
-                return ids
-              }
-              return [...ids, id]
-            })
-          }
-        }, [setIds])}
+           onClick={useCallback(() => {
+             const id = prompt('Workspace ID')
+             if (id) {
+               setIds((ids) => {
+                 if (!ids) {
+                   return [id]
+                 }
+                 if (ids.includes(id)) {
+                   return ids
+                 }
+                 return [...ids, id]
+               })
+             }
+           }, [setIds])}
       >
         ADD Workspace
       </div>

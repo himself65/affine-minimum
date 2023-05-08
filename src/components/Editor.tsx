@@ -1,8 +1,10 @@
-import { useRef} from 'react'
+import { useRef } from 'react'
 import { useAtomValue } from 'jotai'
-import { currentPageIdAtom, editorAtom } from '../store.ts'
+import { WorkspaceMolecule } from '../store.ts'
+import { useMolecule } from 'jotai-molecules'
 
 export const Editor = () => {
+  const { currentPageIdAtom, editorAtom } = useMolecule(WorkspaceMolecule)
   const ref = useRef<HTMLDivElement>(null)
   const pageId = useAtomValue(currentPageIdAtom)
   const editor = useAtomValue(editorAtom)

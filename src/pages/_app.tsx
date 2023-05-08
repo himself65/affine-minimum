@@ -3,10 +3,17 @@ import '../index.css'
 
 import type { AppProps } from 'next/app'
 import { Provider } from 'jotai'
-import { rootStore } from '../store.ts'
+import { rootStore, WorkspaceScope } from '../store.ts'
 import { ErrorBoundary } from 'react-error-boundary'
 import { WorkspaceNotFoundError } from '../utils.ts'
 import Link from 'next/link'
+import { ScopeProvider } from 'jotai-molecules'
+
+const defaultValue: WorkspaceScope = {
+  defaultPage: null,
+  defaultWorkspace: null,
+  defaultMode: 'page'
+}
 
 const App = ({ Component, pageProps }: AppProps) => {
   return (
@@ -34,7 +41,9 @@ const App = ({ Component, pageProps }: AppProps) => {
       }}
     >
       <Provider store={rootStore}>
-        <Component {...pageProps} />
+        <ScopeProvider scope={WorkspaceScope} value={defaultValue}>
+          <Component {...pageProps} />
+        </ScopeProvider>
       </Provider>
     </ErrorBoundary>
   )
