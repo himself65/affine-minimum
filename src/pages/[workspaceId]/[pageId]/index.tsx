@@ -45,7 +45,7 @@ const WorkspacePage = () => {
             const page = workspace.createPage({
               id: `page${workspace.meta.pageMetas.length}`
             })
-            initPage(page)
+            await initPage(page)
           }}
         >
           add page

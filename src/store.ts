@@ -81,17 +81,17 @@ export const WorkspaceMolecule = molecule((_, getScope) => {
       }
       let provider = providerHashMap.get(id)
       if (!provider) {
-        provider = createIndexedDBProvider(workspace.id, workspace.doc)
+        provider = createIndexedDBProvider(workspace.doc)
         assertExists(provider)
         provider.connect()
-        provider.whenSynced.then(() => {
+        provider.whenSynced.then(async () => {
           assertExists(workspace)
           if (workspace.isEmpty) {
             const page = workspace.createPage({
               id: 'page0'
             })
 
-            initPage(page)
+            await initPage(page)
           } else {
             const page = workspace.getPage('page0')
             assertExists(page)
@@ -118,7 +118,6 @@ export const WorkspaceMolecule = molecule((_, getScope) => {
           const group = new DisposableGroup()
           return new Observable<PageMeta[]>((subscriber) => {
             group.add(workspace.slots.pageAdded.on(() => {
-
               subscriber.next(workspace.meta.pageMetas)
             }))
             group.add(workspace.slots.pageRemoved.on(() => {
